@@ -92,6 +92,14 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans
 
 
 #devPanel{display:none!important}
+
+.contact-focus{background:#f7f5ff;border:1px solid #e3defe;border-radius:14px;padding:15px;margin:12px 0;line-height:1.7}
+.contact-focus b{display:block;margin-bottom:4px}
+.contact-examples{display:grid;gap:8px;margin-top:12px}
+.contact-example{background:#f7f7fa;border-radius:12px;padding:12px 13px;font-size:13px;line-height:1.65}
+.contact-example b{display:block;margin-bottom:3px}
+.contact-note{font-size:11px;line-height:1.65;color:#777;margin-top:10px}
+
 </style>
 </head>
 <body>
@@ -318,7 +326,7 @@ const catCopy={
 
 let demographics={gender:'',target:'',age:'',mbti:''};
 let answers={},qi=0,precisionQuestions=[],precisionAnswers=[],pi=0,DEV_PREVIEW=false,freeSaved=false,precisionSaved=false,lastPrecisionAnalysis=null;
-const SURVEY_VERSION='v7.4-deploy-data';
+const SURVEY_VERSION='v7.5-contact-strategy';
 const SCORING_VERSION='4.0-beta';
 const SUPABASE_URL='https://ntprvuoqxrcndponwwuz.supabase.co';
 const SUPABASE_KEY='sb_publishable_FzSLo2PAlVUBs3vLjfkjbQ_OwaSTKg_';
@@ -741,6 +749,53 @@ const growthGuides={
  '관계 자원':[['가용 시간 확인','연애에 실제로 내어줄 수 있는 시간을 현실적으로 계산합니다.'],['조정 범위 정하기','지킬 개인 영역과 관계를 위해 조정 가능한 일정을 나눕니다.'],['지속 가능성 우선','무조건적인 희생보다 반복 가능한 관심과 책임을 기준으로 둡니다.']]
 };
 
+
+function contactStrategy(a,mb){
+ const topKeys=Object.entries(a.demand).sort((x,y)=>(y[1]??0)-(x[1]??0)).slice(0,2).map(x=>x[0]);
+ const examples=[];
+
+ // Ideal-priority specific recurring / discovery places
+ if(topKeys.includes('외적 관리')){
+   examples.push(['운동·자기관리 접점','같은 시간대의 헬스장·수영장·클라이밍·러닝크루·테니스 레슨처럼 생활 루틴과 자기관리 태도가 반복해서 보이는 곳']);
+ }
+ if(topKeys.includes('경제 기반')){
+   examples.push(['커리어·학습 접점','직무 스터디·자격증 학원·외국어 학원·업계 세미나·프로젝트형 커뮤니티처럼 일과 성장 태도가 자연스럽게 드러나는 곳']);
+ }
+ if(topKeys.includes('생활·가치관')){
+   examples.push(['취향·대화 접점','독서모임·언어학원·공방·문화강좌·스터디처럼 관심사와 대화 방식이 여러 번 드러나는 곳']);
+ }
+ if(topKeys.includes('정서·관계')){
+   examples.push(['사람을 오래 볼 수 있는 접점','봉사활동·팀 스포츠·정기 스터디·소규모 취미모임처럼 배려·약속·갈등 태도를 반복해서 볼 수 있는 곳']);
+ }
+ if(topKeys.includes('관계 자원')){
+   examples.push(['생활 반경 안의 반복 접점','주 1회 취미수업·스포츠센터·단골 카페·단골 식당·동네 클래스처럼 큰 결심 없이 생활 속에서 계속 마주칠 가능성이 있는 곳']);
+ }
+
+ if(mb.isI){
+   return {
+    title:'당신에게는 “새로운 사람을 많이 만나는 것”보다 반복 접점을 만드는 전략이 더 잘 맞습니다.',
+    body:'내향형에게 접점을 늘린다는 건 매주 낯선 사람 수십 명을 만나라는 뜻이 아닙니다. <b>같은 장소를 비슷한 요일·시간에 반복해서 이용해 자연스럽게 익숙한 얼굴을 늘리는 것</b>에 가깝습니다. 처음부터 연애 대상으로 판단하기보다, 여러 번 마주치며 말투·약속·생활 태도를 천천히 확인할 수 있는 구조를 만드는 게 핵심입니다.',
+    examples:[
+      ['생활형 반복 접점','같은 시간대의 단골 카페, 자주 가는 식당, 동네 베이커리, 코워킹 공간처럼 생활 반경 안에서 자연스럽게 반복 방문할 수 있는 곳'],
+      ['배움형 반복 접점','언어학원, 자격증 수업, 문화센터, 공방, 독서모임처럼 같은 구성원을 주기적으로 만나는 곳'],
+      ['운동형 반복 접점','헬스장, 수영장, 클라이밍짐, 테니스·골프 레슨, 러닝크루처럼 일정한 시간에 반복적으로 참여할 수 있는 활동']
+    ].concat(examples.slice(0,2)),
+    note:'단골 장소의 목적은 낯선 사람에게 무리하게 말을 거는 것이 아니라, 생활 속에서 “다시 볼 가능성이 있는 사람”의 수를 늘리는 것입니다.'
+   };
+ }else{
+   return {
+    title:'당신에게는 새로운 만남의 수를 빠르게 늘린 뒤, 괜찮은 사람과 후속 접점을 만드는 전략이 잘 맞습니다.',
+    body:'외향형은 새로운 사람과의 첫 만남 자체에 드는 심리적 비용이 상대적으로 낮을 수 있으므로, <b>이벤트성·단발성 만남을 적극적으로 활용해 후보군을 넓히고</b> 마음에 드는 사람에게 두 번째·세 번째 만남을 만드는 방식이 효율적입니다.',
+    examples:[
+      ['이벤트형 만남','템플스테이형 소개팅·단체 소개팅·취향 기반 매칭 행사·싱글 네트워킹처럼 참가자 모두가 새로운 만남을 기대하고 오는 프로그램'],
+      ['대형 커뮤니티','오픈채팅 기반 취미모임, 한강 독서모임, 러닝·등산 모임, 반려견을 실제로 키우는 사람이라면 대형견·견종 동호회처럼 새로운 멤버가 자주 들어오는 모임'],
+      ['행사·체험형 접점','팝업 행사, 전시·공연 연계 모임, 원데이 클래스, 페스티벌·스포츠 관람 모임처럼 한 번에 여러 사람을 만날 수 있는 자리']
+    ].concat(examples.slice(0,2)),
+    note:'단발성 모임의 핵심은 한 번에 “이상형을 찾아내는 것”이 아니라 표본을 늘리는 것입니다. 마음에 드는 사람이 생기면 이후 반복 만남으로 전환해야 실제 관계 가능성이 커집니다.'
+   };
+ }
+}
+
 function renderReport(){
  const a=analyze(),rp=reversePrior(a),mb=mbtiLens(a);
  const gaps=Object.keys(rp.prior).map(name=>({name,expected:rp.prior[name],have:Math.round(a.supply[name]??50),raw:Math.round(rp.prior[name]-(a.supply[name]??50))})).sort((x,y)=>y.raw-x.raw);
@@ -788,8 +843,14 @@ function renderReport(){
  }
 
  const opp=a.opportunity;
- const meetStyle=mb.isI?'여러 사람을 한 번에 많이 만나는 자리보다 <b>같은 사람을 여러 번 볼 수 있는 소규모·반복형 모임</b>':'새로운 사람을 넓게 만날 수 있는 활동을 활용하되 <b>마음이 가는 사람과 다시 만날 수 있는 구조</b>';
- document.getElementById('meetingPlan').innerHTML=`<div class="report-callout">${mb.mbti}의 ${mb.dom.name} 성향과 현재 답변을 함께 보면, ${meetStyle}이 더 잘 맞습니다. 특히 <b>${mb.dom.meet}</b>에서는 당신이 중요하게 보는 특성을 말보다 행동으로 확인하기 쉽습니다.</div><p>${opp<=25?'현재는 사람을 고르는 기준보다 새로운 후보를 만나는 빈도 자체가 더 큰 문제입니다. 생활 반경을 완전히 바꾸기보다, 한 달에 반복해서 참여할 수 있는 접점 하나부터 추가하는 편이 좋습니다.':'현재 만남 기회는 아주 부족하지 않습니다. 사람 수를 더 늘리는 것보다 당신이 중요하게 보는 정서·경제·가치관이 실제 행동으로 드러나는 환경을 선택하는 편이 효율적입니다.'}</p>`;
+ const cs=contactStrategy(a,mb);
+ document.getElementById('meetingPlan').innerHTML=`
+   <div class="contact-focus"><b>${cs.title}</b>${cs.body}</div>
+   <div class="contact-examples">${cs.examples.map(x=>`<div class="contact-example"><b>${x[0]}</b>${x[1]}</div>`).join('')}</div>
+   <div class="contact-note">${cs.note}</div>
+   <p>${opp<=25
+      ?'<b>지금 당신에게 가장 먼저 필요한 건 “접점 늘리기”입니다.</b> 자기개선을 더 하기 전에 위 예시 중 부담이 가장 적은 것 하나를 골라 최소 6~8주 정도 반복해보는 편이 좋습니다.'
+      :'현재 만남 기회가 아주 적은 편은 아닙니다. 따라서 사람 수만 더 늘리기보다, 위 예시 중 당신이 중요하게 보는 특성을 실제 행동으로 확인할 수 있는 접점을 고르는 편이 좋습니다.'}</p>`;
 
  lastPrecisionAnalysis={type:a.type,mbti:mb.mbti,dominant_function:mb.dom.name,auxiliary_function:mb.aux.name,research_prior_model:rp.model,reverse_prior:rp.prior,reverse_gaps:gaps,change_willingness:willingness,change_capacity:capacity,recommended_route:routeType,growth_candidate:grow};
  savePrecisionData();
